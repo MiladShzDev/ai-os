@@ -193,50 +193,42 @@ The agent may prepare and navigate a task, but sensitive operations remain subje
 | Realtime | WebSocket |
 | API | REST / WebSocket |
 
-## Development Machines
+## Repository Structure
 
-### Milad — MacBook M4
-
-Primary owner for:
-
-- Server and infrastructure
-- FastAPI backend
-- Server Agent
-- AI / LLM layer
-- Agent orchestration
-- Dynamic agents and scheduler
-- Device gateway
-- macOS client and agent
-- iOS / iPadOS build and release
-- Next.js and production infrastructure
-
-### Ashkan — Lenovo Windows
-
-Primary owner for:
-
-- Windows client and agent
-- Flutter cross-platform client foundations
-- Windows OS integration
-- Android client and agent
-- Application discovery and control on Windows
-- Browser integration
-- Local runtime and tools
-- Windows release and testing
-
-## Development Strategy
-
-Platform ownership follows the actual build and test environments:
-
-- Windows development and release: Ashkan's Lenovo Windows
-- macOS and iOS/iPadOS development and release: Milad's MacBook M4 + Xcode
-- Server development: Milad's MacBook M4 using Docker Compose
-- Production server: Linux environment
-- Shared contracts and cross-platform interfaces are maintained jointly
+```text
+ai-os/
+├── apps/
+│   ├── desktop/
+│   ├── mobile/
+│   └── web/
+├── services/
+│   ├── api/
+│   └── agent-server/
+├── runtime/
+│   ├── local-agent/
+│   ├── orchestrator/
+│   └── scheduler/
+├── packages/
+│   ├── contracts/
+│   ├── protocol/
+│   ├── tools/
+│   ├── capabilities/
+│   └── sdk/
+├── infra/
+│   ├── docker/
+│   └── scripts/
+├── tests/
+│   ├── unit/
+│   ├── integration/
+│   └── e2e/
+├── docs/
+└── README.md
+```
 
 ## Repository Documentation
 
 - `docs/ARCHITECTURE.md` — system architecture and runtime boundaries
-- `docs/ROADMAP.md` — phased execution plan and ownership
+- `docs/ROADMAP.md` — phased execution plan
 - `docs/PROTOCOLS.md` — agent, device, task, capability, and event contracts
 - `docs/SECURITY.md` — security and permission model
 
