@@ -1,0 +1,20 @@
+EventContract
+
+event_id: string
+type: string
+source: string
+node_id: string | null
+payload: object
+timestamp: datetime
+correlation_id: string | null
+
+EventTypes
+node.connected
+node.disconnected
+application.installed
+application.uninstalled
+file.created
+email.received
+schedule.triggered
+task.completed
+permission.requested

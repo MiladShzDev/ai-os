@@ -1,0 +1,17 @@
+PermissionContract
+
+permission_id: string
+subject: string
+capability: string
+scope: object
+policy: string
+decision: string
+confirmation_required: boolean
+expires_at: datetime | null
+
+PermissionDecisions
+allow
+deny
+ask
+allow_once
+allow_with_conditions

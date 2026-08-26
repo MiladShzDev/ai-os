@@ -1,0 +1,10 @@
+DeviceContract
+
+node_id: string
+node_type: string
+platform: string
+version: string
+status: string
+capabilities: list<string>
+agent_id: string
+last_seen: datetime
