@@ -1,0 +1,30 @@
+WindowsProcessContract
+
+process_id: string
+executable: string
+arguments: list<string>
+working_directory: string | null
+status: string
+exit_code: integer | null
+started_at: datetime | null
+finished_at: datetime | null
+
+ProcessStates
+created
+starting
+running
+completed
+failed
+terminated
+
+ProcessOperations
+start
+status
+terminate
+
+SecurityRules
+validate_executable
+validate_arguments
+respect_user_permissions
+no_privilege_escalation
+no_security_bypass

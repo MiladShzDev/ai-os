@@ -1,0 +1,8 @@
+HeartbeatMessage
+
+message_type: heartbeat
+node_id: string
+agent_id: string
+status: string
+timestamp: datetime
+correlation_id: string

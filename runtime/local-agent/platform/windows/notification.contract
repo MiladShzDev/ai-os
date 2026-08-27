@@ -1,0 +1,31 @@
+WindowsNotificationContract
+
+notification_id: string
+node_id: string
+title: string
+body: string
+severity: string
+status: string
+created_at: datetime
+shown_at: datetime | null
+error: object | null
+
+NotificationSeverity
+info
+success
+warning
+error
+
+NotificationStates
+created
+pending
+shown
+failed
+
+NotificationOperations
+show
+
+SecurityRules
+no_sensitive_data_in_notification
+respect_user_notification_permissions
+no_credential_exposure

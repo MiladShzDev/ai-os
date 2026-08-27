@@ -1,0 +1,30 @@
+LocalTaskStateContract
+
+task_id: string
+node_id: string
+agent_id: string
+state: string
+progress: integer
+current_tool: string | null
+started_at: datetime | null
+updated_at: datetime
+completed_at: datetime | null
+result: object | null
+error: object | null
+
+TaskStates
+created
+planned
+waiting_permission
+queued
+running
+waiting_external
+completed
+failed
+cancelled
+
+RecoveryRules
+state_must_be_persistent
+completed_task_must_not_be_reexecuted
+failed_task_must_be_recoverable
+unknown_execution_state_requires_reconciliation

@@ -1,0 +1,25 @@
+LocalToolRuntimeContract
+
+runtime_id: string
+node_id: string
+agent_id: string
+available_tools: list<string>
+active_tools: list<string>
+status: string
+
+RuntimeStates
+starting
+ready
+executing
+stopping
+stopped
+error
+
+ToolExecutionResult
+execution_id: string
+tool_id: string
+success: boolean
+result: object | null
+error: object | null
+started_at: datetime
+completed_at: datetime | null

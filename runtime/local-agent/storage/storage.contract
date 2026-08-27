@@ -1,0 +1,32 @@
+LocalStorageContract
+
+storage_id: string
+node_id: string
+storage_type: string
+status: string
+
+StorageTypes
+local_state
+task_state
+event_queue
+sync_queue
+agent_state
+
+StorageOperations
+create
+read
+update
+delete
+list
+
+StorageStates
+starting
+ready
+offline
+error
+
+PersistenceRules
+stable_identifiers
+atomic_updates
+recoverable_state
+no_secret_logging

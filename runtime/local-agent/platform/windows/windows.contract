@@ -1,0 +1,28 @@
+WindowsPlatformContract
+
+platform: windows
+architecture: string
+os_version: string
+runtime_version: string
+
+PlatformCapabilities
+process.start
+process.stop
+file.read
+file.write
+application.discover
+application.open
+application.close
+notification.show
+
+PlatformIntegration
+process_api: string
+filesystem_api: string
+application_registry: string
+notification_api: string
+
+SecurityBoundary
+os_permissions: required
+administrator_privileges: explicit
+credential_access: prohibited
+security_bypass: prohibited

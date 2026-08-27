@@ -1,0 +1,34 @@
+WindowsApplicationLaunchContract
+
+launch_id: string
+node_id: string
+application_id: string
+package_id: string
+launch_target: string
+arguments: list<string>
+status: string
+started_at: datetime | null
+completed_at: datetime | null
+process_id: string | null
+result: object | null
+error: object | null
+
+LaunchTargets
+verified_registry_entry
+start_menu_entry
+verified_executable
+
+LaunchStates
+created
+starting
+running
+completed
+failed
+
+SecurityRules
+application_must_be_resolved
+launch_target_must_be_verified
+arguments_must_be_validated
+respect_user_permissions
+no_privilege_escalation
+no_security_bypass

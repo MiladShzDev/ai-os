@@ -1,0 +1,30 @@
+LocalSyncContract
+
+sync_id: string
+node_id: string
+status: string
+last_sync_at: datetime | null
+server_cursor: string | null
+pending_items: list<object>
+
+SyncStates
+offline
+queued
+syncing
+completed
+failed
+
+SyncItem
+item_id: string
+item_type: string
+operation: string
+payload: object
+created_at: datetime
+attempts: integer
+idempotency_key: string
+
+SyncOperations
+create
+update
+delete
+reconcile

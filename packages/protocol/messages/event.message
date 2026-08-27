@@ -1,0 +1,10 @@
+EventMessage
+
+message_type: event
+event_id: string
+type: string
+source: string
+node_id: string | null
+payload: object
+timestamp: datetime
+correlation_id: string

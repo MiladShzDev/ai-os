@@ -1,0 +1,24 @@
+LocalPermissionContract
+
+permission_id: string
+node_id: string
+agent_id: string
+capability: string
+scope: object
+policy: string
+decision: string
+confirmation_required: boolean
+expires_at: datetime | null
+
+PermissionDecisions
+allow
+deny
+ask
+allow_once
+allow_with_conditions
+
+PermissionScopes
+task
+agent
+node
+global

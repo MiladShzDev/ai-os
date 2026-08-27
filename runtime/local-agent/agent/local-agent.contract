@@ -1,0 +1,23 @@
+LocalAgentContract
+
+agent_id: string
+agent_type: string
+node_id: string
+status: string
+capabilities: list<string>
+tools: list<string>
+permissions: list<string>
+state: object
+
+AgentTypes
+local
+
+AgentStates
+starting
+ready
+running
+waiting_permission
+offline
+stopping
+stopped
+error

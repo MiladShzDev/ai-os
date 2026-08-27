@@ -1,0 +1,11 @@
+PermissionMessage
+
+message_type: permission
+permission_id: string
+task_id: string
+capability: string
+scope: object
+decision: string
+confirmation_required: boolean
+timestamp: datetime
+correlation_id: string
