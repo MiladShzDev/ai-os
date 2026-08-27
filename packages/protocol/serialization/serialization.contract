@@ -1,0 +1,20 @@
+SerializationContract
+
+serialization_id: string
+format: string
+version: string
+content_type: string
+encoding: string
+
+SerializationFormats
+json
+
+ContentTypes
+task
+event
+permission
+sync
+heartbeat
+
+EncodingTypes
+utf-8

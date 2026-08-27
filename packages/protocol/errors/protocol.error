@@ -1,0 +1,22 @@
+ProtocolError
+
+error_id: string
+code: string
+message: string
+details: object | null
+retryable: boolean
+timestamp: datetime
+correlation_id: string | null
+
+ProtocolErrorCodes
+invalid_message
+invalid_schema
+unsupported_message_type
+unsupported_version
+serialization_error
+transport_error
+authentication_error
+authorization_error
+timeout
+conflict
+internal_error

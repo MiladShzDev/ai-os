@@ -1,0 +1,35 @@
+WindowsApplicationDiscoveryContract
+
+discovery_id: string
+node_id: string
+status: string
+started_at: datetime
+completed_at: datetime | null
+applications: list<object>
+error: object | null
+
+ApplicationIdentity
+application_id: string
+package_id: string
+name: string
+version: string | null
+install_state: string
+launch_info: object | null
+capabilities: list<string>
+source: string | null
+
+DiscoverySources
+windows_registry
+start_menu
+known_install_locations
+
+InstallStates
+installed
+uninstalled
+unknown
+
+DiscoveryStates
+starting
+running
+completed
+failed

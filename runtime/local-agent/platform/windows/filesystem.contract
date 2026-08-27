@@ -1,0 +1,35 @@
+WindowsFilesystemContract
+
+operation_id: string
+node_id: string
+path: string
+operation: string
+status: string
+result: object | null
+error: object | null
+timestamp: datetime
+
+FilesystemOperations
+read
+write
+create
+delete
+list
+exists
+
+FilesystemStates
+pending
+running
+completed
+failed
+
+SecurityRules
+validate_path
+respect_filesystem_permissions
+no_system_path_bypass
+no_security_bypass
+
+SensitiveOperations
+delete
+overwrite
+system_file_write

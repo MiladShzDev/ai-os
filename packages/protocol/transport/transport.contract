@@ -1,0 +1,22 @@
+TransportContract
+
+transport_id: string
+transport_type: string
+source: string
+destination: string
+message_type: string
+reliable: boolean
+ordered: boolean
+encrypted: boolean
+
+TransportTypes
+rest
+websocket
+local
+sync
+
+CommunicationScopes
+client_to_server
+server_to_client
+local_runtime
+runtime_to_runtime

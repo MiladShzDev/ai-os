@@ -1,0 +1,15 @@
+ProtocolVersionContract
+
+protocol_name: string
+version: string
+major: integer
+minor: integer
+patch: integer
+
+CurrentVersion
+1.0.0
+
+Compatibility
+major_breaking
+minor_backward_compatible
+patch_bugfix

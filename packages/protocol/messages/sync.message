@@ -1,0 +1,9 @@
+SyncMessage
+
+message_type: sync
+sync_id: string
+node_id: string
+items: list<object>
+cursor: string | null
+timestamp: datetime
+correlation_id: string

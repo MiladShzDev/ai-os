@@ -1,0 +1,21 @@
+LocalEventBusContract
+
+event_bus_id: string
+node_id: string
+status: string
+subscribers: list<string>
+
+EventDelivery
+event_id: string
+event_type: string
+source: string
+payload: object
+timestamp: datetime
+correlation_id: string | null
+
+EventBusStates
+starting
+ready
+dispatching
+stopped
+error
