@@ -37,3 +37,15 @@ def get_device(node_id: str, db: Session = Depends(get_db)) -> Device:
 @router.get("", response_model=list[DeviceResponse])
 def list_devices(db: Session = Depends(get_db)) -> list[Device]:
     return db.query(Device).order_by(Device.node_id).all()
+
+
+@router.post("", response_model=DeviceResponse, status_code=201)
+def create_device(
+    payload: DeviceCreate,
+    db: Session = Depends(get_db),
+) -> Device:
+    device = Device(**payload.model_dump())
+    db.add(device)
+    db.commit()
+    db.refresh(device)
+    return device

@@ -52,3 +52,31 @@ def test_list_devices():
 
     assert response.status_code == 200
     assert isinstance(response.json(), list)
+
+
+def test_create_device():
+    payload = {
+        "node_id": "create-test-node",
+        "node_type": "client",
+        "platform": "macos",
+        "version": "1.0.0",
+        "status": "online",
+        "capabilities": ["test"],
+        "agent_id": "create-test-agent",
+        "last_seen": "2026-08-27T12:00:00Z",
+    }
+
+    response = client.post("/api/v1/devices", json=payload)
+
+    assert response.status_code == 201
+    assert response.json()["node_id"] == "create-test-node"
+    assert response.json()["agent_id"] == "create-test-agent"
+
+    db = SessionLocal()
+    try:
+        device = db.get(Device, "create-test-node")
+        assert device is not None
+        db.delete(device)
+        db.commit()
+    finally:
+        db.close()
