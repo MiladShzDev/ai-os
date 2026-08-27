@@ -1,0 +1,22 @@
+CapabilityContract
+
+capability_id: string
+name: string
+description: string
+platforms: list<string>
+risk_level: string
+execution_scope: string
+input_schema: object
+output_schema: object
+
+RiskLevels
+low
+medium
+high
+critical
+
+ExecutionScopes
+local
+server
+remote
+hybrid

@@ -1,0 +1,11 @@
+ApplicationContract
+
+application_id: string
+node_id: string
+package_id: string
+name: string
+version: string
+install_state: string
+launch_info: object
+capabilities: list<string>
+store_metadata: object

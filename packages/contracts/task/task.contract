@@ -1,0 +1,27 @@
+TaskContract
+
+task_id: string
+parent_task_id: string | null
+request: string
+intent: string | null
+target_nodes: list<string>
+selected_agents: list<string>
+required_capabilities: list<string>
+state: string
+priority: string
+created_at: datetime
+updated_at: datetime
+result: object | null
+error: object | null
+
+TaskStates
+
+created
+planned
+waiting_permission
+queued
+running
+waiting_external
+completed
+failed
+cancelled
