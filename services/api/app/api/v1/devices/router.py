@@ -32,3 +32,8 @@ def get_device(node_id: str, db: Session = Depends(get_db)) -> Device:
         raise HTTPException(status_code=404, detail="Device not found")
 
     return device
+
+
+@router.get("", response_model=list[DeviceResponse])
+def list_devices(db: Session = Depends(get_db)) -> list[Device]:
+    return db.query(Device).order_by(Device.node_id).all()

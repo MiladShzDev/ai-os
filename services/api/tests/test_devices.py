@@ -45,3 +45,10 @@ def test_get_device():
         db.delete(device)
         db.commit()
         db.close()
+
+
+def test_list_devices():
+    response = client.get("/api/v1/devices")
+
+    assert response.status_code == 200
+    assert isinstance(response.json(), list)
