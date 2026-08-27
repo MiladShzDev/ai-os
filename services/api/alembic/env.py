@@ -19,7 +19,7 @@ if config.config_file_name is not None:
 # from myapp import mymodel
 # target_metadata = mymodel.Base.metadata
 from app.db import Base
-from app.models import Agent
+from app.models import Agent, Device, Application, Capability, Permission, Task
 
 target_metadata = Base.metadata
 
