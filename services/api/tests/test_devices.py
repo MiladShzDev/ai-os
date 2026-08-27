@@ -1,6 +1,10 @@
+from datetime import datetime, timezone
+
 from fastapi.testclient import TestClient
 
+from app.db import SessionLocal
 from app.main import app
+from app.models.device import Device
 
 client = TestClient(app)
 
@@ -10,3 +14,34 @@ def test_get_missing_device():
 
     assert response.status_code == 404
     assert response.json() == {"detail": "Device not found"}
+
+
+def test_get_device():
+    db = SessionLocal()
+
+    device = Device(
+        node_id="test-node",
+        node_type="client",
+        platform="macos",
+        version="1.0.0",
+        status="online",
+        capabilities=[],
+        agent_id="test-agent",
+        last_seen=datetime.now(timezone.utc),
+    )
+
+    try:
+        db.add(device)
+        db.commit()
+
+        response = client.get("/api/v1/devices/test-node")
+
+        assert response.status_code == 200
+        assert response.json()["node_id"] == "test-node"
+        assert response.json()["node_type"] == "client"
+        assert response.json()["platform"] == "macos"
+        assert response.json()["agent_id"] == "test-agent"
+    finally:
+        db.delete(device)
+        db.commit()
+        db.close()
