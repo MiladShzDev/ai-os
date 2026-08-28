@@ -658,3 +658,37 @@ def test_list_devices_order_by_node_id():
             db.commit()
         finally:
             db.close()
+
+
+def test_update_device_rejects_empty_field():
+    payload = {
+        "node_id": "invalid-update-test-node",
+        "node_type": "client",
+        "platform": "macos",
+        "version": "1.0.0",
+        "status": "online",
+        "capabilities": ["test"],
+        "agent_id": "invalid-update-agent",
+        "last_seen": "2026-08-27T12:00:00Z",
+    }
+
+    created = client.post("/api/v1/devices", json=payload)
+    assert created.status_code == 201
+
+    try:
+        response = client.patch(
+            "/api/v1/devices/invalid-update-test-node",
+            json={"status": ""},
+        )
+
+        assert response.status_code == 422
+
+    finally:
+        db = SessionLocal()
+        try:
+            device = db.get(Device, "invalid-update-test-node")
+            if device is not None:
+                db.delete(device)
+                db.commit()
+        finally:
+            db.close()
