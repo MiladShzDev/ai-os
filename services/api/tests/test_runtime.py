@@ -4,22 +4,34 @@ from fastapi.testclient import TestClient
 
 from app.db import SessionLocal
 from app.main import app
+from app.models.agent import Agent
 from app.models.task import Task
 
 client = TestClient(app)
 
 
-def test_runtime_execute_task():
+def test_runtime_execute_selects_agent_by_capability():
     db = SessionLocal()
 
+    agent = Agent(
+        agent_id="runtime-agent",
+        agent_type="local",
+        node_id="runtime-node",
+        status="active",
+        capabilities=["shell"],
+        tools=[],
+        permissions=[],
+        state={},
+    )
+
     task = Task(
-        task_id="runtime-test-task",
+        task_id="runtime-capability-task",
         parent_task_id=None,
-        request="execute runtime task",
+        request="execute shell task",
         intent="runtime_test",
         target_nodes=[],
         selected_agents=[],
-        required_capabilities=[],
+        required_capabilities=["shell"],
         state="pending",
         priority="normal",
         created_at=datetime.now(timezone.utc),
@@ -28,6 +40,7 @@ def test_runtime_execute_task():
         error=None,
     )
 
+    db.add(agent)
     db.add(task)
     db.commit()
     db.close()
@@ -36,21 +49,29 @@ def test_runtime_execute_task():
         response = client.post(
             "/api/v1/runtime/execute",
             json={
-                "task_id": "runtime-test-task"
+                "task_id": "runtime-capability-task"
             },
         )
 
         assert response.status_code == 200
-        assert response.json()["task_id"] == "runtime-test-task"
         assert response.json()["state"] == "running"
-        assert response.json()["selected_agents"] == []
+        assert response.json()["selected_agents"] == [
+            "runtime-agent"
+        ]
 
     finally:
         db = SessionLocal()
+
         try:
-            task = db.get(Task, "runtime-test-task")
+            task = db.get(Task, "runtime-capability-task")
             if task is not None:
                 db.delete(task)
-                db.commit()
+
+            agent = db.get(Agent, "runtime-agent")
+            if agent is not None:
+                db.delete(agent)
+
+            db.commit()
+
         finally:
             db.close()
