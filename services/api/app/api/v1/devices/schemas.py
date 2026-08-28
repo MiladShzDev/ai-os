@@ -16,3 +16,13 @@ class DeviceCreate(BaseModel):
 
 class DeviceResponse(DeviceCreate):
     pass
+
+
+class DeviceUpdate(BaseModel):
+    node_type: str | None = None
+    platform: str | None = None
+    version: str | None = None
+    status: str | None = None
+    capabilities: list | None = None
+    agent_id: str | None = None
+    last_seen: datetime | None = None

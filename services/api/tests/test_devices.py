@@ -180,3 +180,44 @@ def test_delete_device():
 
     missing = client.get("/api/v1/devices/delete-test-node")
     assert missing.status_code == 404
+
+
+def test_update_device():
+    payload = {
+        "node_id": "update-test-node",
+        "node_type": "client",
+        "platform": "macos",
+        "version": "1.0.0",
+        "status": "online",
+        "capabilities": ["test"],
+        "agent_id": "update-test-agent",
+        "last_seen": "2026-08-27T12:00:00Z",
+    }
+
+    created = client.post("/api/v1/devices", json=payload)
+    assert created.status_code == 201
+
+    try:
+        response = client.patch(
+            "/api/v1/devices/update-test-node",
+            json={
+                "version": "2.0.0",
+                "status": "offline",
+            },
+        )
+
+        assert response.status_code == 200
+        assert response.json()["node_id"] == "update-test-node"
+        assert response.json()["version"] == "2.0.0"
+        assert response.json()["status"] == "offline"
+        assert response.json()["platform"] == "macos"
+        assert response.json()["agent_id"] == "update-test-agent"
+    finally:
+        db = SessionLocal()
+        try:
+            device = db.get(Device, "update-test-node")
+            if device is not None:
+                db.delete(device)
+                db.commit()
+        finally:
+            db.close()
