@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
@@ -42,8 +42,18 @@ def get_device(node_id: str, db: Session = Depends(get_db)) -> Device:
 
 
 @router.get("", response_model=list[DeviceResponse])
-def list_devices(db: Session = Depends(get_db)) -> list[Device]:
-    return db.query(Device).order_by(Device.node_id).all()
+def list_devices(
+    limit: int = Query(default=50, ge=1, le=100),
+    offset: int = Query(default=0, ge=0),
+    db: Session = Depends(get_db),
+) -> list[Device]:
+    return (
+        db.query(Device)
+        .order_by(Device.node_id)
+        .offset(offset)
+        .limit(limit)
+        .all()
+    )
 
 
 @router.delete("/{node_id}", status_code=204)
