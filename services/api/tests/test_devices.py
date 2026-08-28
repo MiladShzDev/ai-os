@@ -112,3 +112,41 @@ def test_create_duplicate_device():
                 db.commit()
         finally:
             db.close()
+
+
+def test_create_duplicate_device_race_safe():
+    payload = {
+        "node_id": "race-test-node",
+        "node_type": "client",
+        "platform": "macos",
+        "version": "1.0.0",
+        "status": "online",
+        "capabilities": ["test"],
+        "agent_id": "race-test-agent",
+        "last_seen": "2026-08-27T12:00:00Z",
+    }
+
+    db = SessionLocal()
+    try:
+        existing = db.get(Device, "race-test-node")
+        if existing is not None:
+            db.delete(existing)
+            db.commit()
+    finally:
+        db.close()
+
+    first = client.post("/api/v1/devices", json=payload)
+    assert first.status_code == 201
+
+    second = client.post("/api/v1/devices", json=payload)
+    assert second.status_code == 409
+    assert second.json() == {"detail": "Device already exists"}
+
+    db = SessionLocal()
+    try:
+        device = db.get(Device, "race-test-node")
+        assert device is not None
+        db.delete(device)
+        db.commit()
+    finally:
+        db.close()
