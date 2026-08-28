@@ -231,3 +231,39 @@ def test_update_missing_device():
 
     assert response.status_code == 404
     assert response.json() == {"detail": "Device not found"}
+
+
+def test_update_device_empty_payload():
+    payload = {
+        "node_id": "empty-update-test-node",
+        "node_type": "client",
+        "platform": "macos",
+        "version": "1.0.0",
+        "status": "online",
+        "capabilities": ["test"],
+        "agent_id": "empty-update-test-agent",
+        "last_seen": "2026-08-27T12:00:00Z",
+    }
+
+    created = client.post("/api/v1/devices", json=payload)
+    assert created.status_code == 201
+
+    try:
+        response = client.patch(
+            "/api/v1/devices/empty-update-test-node",
+            json={},
+        )
+
+        assert response.status_code == 200
+        assert response.json()["node_id"] == "empty-update-test-node"
+        assert response.json()["version"] == "1.0.0"
+        assert response.json()["status"] == "online"
+    finally:
+        db = SessionLocal()
+        try:
+            device = db.get(Device, "empty-update-test-node")
+            if device is not None:
+                db.delete(device)
+                db.commit()
+        finally:
+            db.close()
