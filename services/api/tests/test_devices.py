@@ -537,3 +537,61 @@ def test_list_devices_filter_by_node_type():
                 db.commit()
         finally:
             db.close()
+
+
+def test_list_devices_combined_filters():
+    payloads = [
+        {
+            "node_id": "combined-filter-match-node",
+            "node_type": "client",
+            "platform": "linux",
+            "version": "1.0.0",
+            "status": "online",
+            "capabilities": ["test"],
+            "agent_id": "combined-agent-1",
+            "last_seen": "2026-08-27T12:00:00Z",
+        },
+        {
+            "node_id": "combined-filter-other-node",
+            "node_type": "client",
+            "platform": "linux",
+            "version": "1.0.0",
+            "status": "offline",
+            "capabilities": ["test"],
+            "agent_id": "combined-agent-2",
+            "last_seen": "2026-08-27T12:00:00Z",
+        },
+    ]
+
+    try:
+        for payload in payloads:
+            response = client.post("/api/v1/devices", json=payload)
+            assert response.status_code == 201
+
+        response = client.get(
+            "/api/v1/devices",
+            params={
+                "platform": "linux",
+                "status": "online",
+            },
+        )
+
+        assert response.status_code == 200
+        devices = response.json()
+
+        assert len(devices) == 1
+        assert devices[0]["node_id"] == "combined-filter-match-node"
+
+    finally:
+        db = SessionLocal()
+        try:
+            for node_id in [
+                "combined-filter-match-node",
+                "combined-filter-other-node",
+            ]:
+                device = db.get(Device, node_id)
+                if device is not None:
+                    db.delete(device)
+            db.commit()
+        finally:
+            db.close()
