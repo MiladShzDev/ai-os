@@ -1,4 +1,5 @@
 from fastapi import APIRouter, Depends, HTTPException
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from ....deps import get_db
@@ -49,6 +50,12 @@ def create_device(
 
     device = Device(**payload.model_dump())
     db.add(device)
-    db.commit()
+
+    try:
+        db.commit()
+    except IntegrityError:
+        db.rollback()
+        raise HTTPException(status_code=409, detail="Device already exists")
+
     db.refresh(device)
     return device
