@@ -19,7 +19,13 @@ def create_device(
 
     device = Device(**payload.model_dump())
     db.add(device)
-    db.commit()
+
+    try:
+        db.commit()
+    except IntegrityError:
+        db.rollback()
+        raise HTTPException(status_code=409, detail="Device already exists")
+
     db.refresh(device)
 
     return device
@@ -38,27 +44,6 @@ def get_device(node_id: str, db: Session = Depends(get_db)) -> Device:
 @router.get("", response_model=list[DeviceResponse])
 def list_devices(db: Session = Depends(get_db)) -> list[Device]:
     return db.query(Device).order_by(Device.node_id).all()
-
-
-@router.post("", response_model=DeviceResponse, status_code=201)
-def create_device(
-    payload: DeviceCreate,
-    db: Session = Depends(get_db),
-) -> Device:
-    if db.get(Device, payload.node_id) is not None:
-        raise HTTPException(status_code=409, detail="Device already exists")
-
-    device = Device(**payload.model_dump())
-    db.add(device)
-
-    try:
-        db.commit()
-    except IntegrityError:
-        db.rollback()
-        raise HTTPException(status_code=409, detail="Device already exists")
-
-    db.refresh(device)
-    return device
 
 
 @router.delete("/{node_id}", status_code=204)
