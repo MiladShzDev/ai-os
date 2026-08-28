@@ -709,3 +709,37 @@ def test_create_device_rejects_too_long_field():
     response = client.post("/api/v1/devices", json=payload)
 
     assert response.status_code == 422
+
+
+def test_update_device_rejects_too_long_field():
+    payload = {
+        "node_id": "invalid-update-length-node",
+        "node_type": "client",
+        "platform": "macos",
+        "version": "1.0.0",
+        "status": "online",
+        "capabilities": ["test"],
+        "agent_id": "invalid-update-length-agent",
+        "last_seen": "2026-08-27T12:00:00Z",
+    }
+
+    created = client.post("/api/v1/devices", json=payload)
+    assert created.status_code == 201
+
+    try:
+        response = client.patch(
+            "/api/v1/devices/invalid-update-length-node",
+            json={"status": "x" * 51},
+        )
+
+        assert response.status_code == 422
+
+    finally:
+        db = SessionLocal()
+        try:
+            device = db.get(Device, "invalid-update-length-node")
+            if device is not None:
+                db.delete(device)
+                db.commit()
+        finally:
+            db.close()
