@@ -781,3 +781,12 @@ def test_device_response_contains_all_fields():
                 db.commit()
         finally:
             db.close()
+
+
+def test_list_devices_rejects_invalid_filter_length():
+    response = client.get(
+        "/api/v1/devices",
+        params={"status": "x" * 51},
+    )
+
+    assert response.status_code == 422
