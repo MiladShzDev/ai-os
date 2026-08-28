@@ -267,3 +267,19 @@ def test_update_device_empty_payload():
                 db.commit()
         finally:
             db.close()
+
+
+def test_create_device_rejects_missing_required_field():
+    payload = {
+        "node_id": "invalid-device-test-node",
+        "node_type": "client",
+        "platform": "macos",
+        "version": "1.0.0",
+        "status": "online",
+        "capabilities": ["test"],
+        "last_seen": "2026-08-27T12:00:00Z",
+    }
+
+    response = client.post("/api/v1/devices", json=payload)
+
+    assert response.status_code == 422
