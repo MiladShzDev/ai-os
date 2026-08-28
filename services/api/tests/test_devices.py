@@ -790,3 +790,44 @@ def test_list_devices_rejects_invalid_filter_length():
     )
 
     assert response.status_code == 422
+
+
+def test_update_device_keeps_unmodified_fields():
+    payload = {
+        "node_id": "partial-update-test-node",
+        "node_type": "client",
+        "platform": "macos",
+        "version": "1.0.0",
+        "status": "online",
+        "capabilities": ["test"],
+        "agent_id": "partial-update-agent",
+        "last_seen": "2026-08-27T12:00:00Z",
+    }
+
+    created = client.post("/api/v1/devices", json=payload)
+    assert created.status_code == 201
+
+    try:
+        response = client.patch(
+            "/api/v1/devices/partial-update-test-node",
+            json={"status": "offline"},
+        )
+
+        assert response.status_code == 200
+        device = response.json()
+
+        assert device["status"] == "offline"
+        assert device["node_type"] == "client"
+        assert device["platform"] == "macos"
+        assert device["version"] == "1.0.0"
+        assert device["agent_id"] == "partial-update-agent"
+
+    finally:
+        db = SessionLocal()
+        try:
+            device = db.get(Device, "partial-update-test-node")
+            if device is not None:
+                db.delete(device)
+                db.commit()
+        finally:
+            db.close()
