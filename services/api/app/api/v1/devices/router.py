@@ -59,3 +59,14 @@ def create_device(
 
     db.refresh(device)
     return device
+
+
+@router.delete("/{node_id}", status_code=204)
+def delete_device(node_id: str, db: Session = Depends(get_db)) -> None:
+    device = db.get(Device, node_id)
+
+    if device is None:
+        raise HTTPException(status_code=404, detail="Device not found")
+
+    db.delete(device)
+    db.commit()

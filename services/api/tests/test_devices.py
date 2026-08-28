@@ -150,3 +150,33 @@ def test_create_duplicate_device_race_safe():
         db.commit()
     finally:
         db.close()
+
+
+def test_delete_missing_device():
+    response = client.delete("/api/v1/devices/missing-delete-node")
+
+    assert response.status_code == 404
+    assert response.json() == {"detail": "Device not found"}
+
+
+def test_delete_device():
+    payload = {
+        "node_id": "delete-test-node",
+        "node_type": "client",
+        "platform": "macos",
+        "version": "1.0.0",
+        "status": "online",
+        "capabilities": ["test"],
+        "agent_id": "delete-test-agent",
+        "last_seen": "2026-08-27T12:00:00Z",
+    }
+
+    created = client.post("/api/v1/devices", json=payload)
+    assert created.status_code == 201
+
+    deleted = client.delete("/api/v1/devices/delete-test-node")
+    assert deleted.status_code == 204
+    assert deleted.content == b""
+
+    missing = client.get("/api/v1/devices/delete-test-node")
+    assert missing.status_code == 404
