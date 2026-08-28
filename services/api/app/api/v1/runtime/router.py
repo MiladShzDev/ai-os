@@ -19,17 +19,12 @@ def execute_task(
 
     if task is None:
         raise HTTPException(status_code=404, detail="Task not found")
+    from ....services.runtime.executor import execute_task
 
-    selected_agents = select_agents(
-        db,
-        task,
+    task = execute_task(
+    db,
+    task,
     )
-
-    task.selected_agents = selected_agents
-    task.state = "running"
-
-    db.commit()
-    db.refresh(task)
 
     return RuntimeExecuteResponse(
         task_id=task.task_id,

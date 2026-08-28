@@ -56,3 +56,29 @@ def select_agents(
             selected_agents.append(agent.agent_id)
 
     return selected_agents
+
+
+def execute_task(
+    db: Session,
+    task: Task,
+) -> Task:
+    selected_agents = select_agents(
+        db,
+        task,
+    )
+
+    if not selected_agents:
+        task.state = "failed"
+        task.error = {
+            "reason": "No available agent",
+        }
+
+    else:
+        task.selected_agents = selected_agents
+        task.state = "running"
+        task.error = None
+
+    db.commit()
+    db.refresh(task)
+
+    return task
