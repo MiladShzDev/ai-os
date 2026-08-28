@@ -44,6 +44,9 @@ def create_device(
     payload: DeviceCreate,
     db: Session = Depends(get_db),
 ) -> Device:
+    if db.get(Device, payload.node_id) is not None:
+        raise HTTPException(status_code=409, detail="Device already exists")
+
     device = Device(**payload.model_dump())
     db.add(device)
     db.commit()

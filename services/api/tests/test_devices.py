@@ -80,3 +80,35 @@ def test_create_device():
         db.commit()
     finally:
         db.close()
+
+
+def test_create_duplicate_device():
+    payload = {
+        "node_id": "duplicate-test-node",
+        "node_type": "client",
+        "platform": "macos",
+        "version": "1.0.0",
+        "status": "online",
+        "capabilities": [],
+        "agent_id": "duplicate-test-agent",
+        "last_seen": "2026-08-27T12:00:00Z",
+    }
+
+    first = client.post("/api/v1/devices", json=payload)
+
+    assert first.status_code == 201
+
+    try:
+        second = client.post("/api/v1/devices", json=payload)
+
+        assert second.status_code == 409
+        assert second.json() == {"detail": "Device already exists"}
+    finally:
+        db = SessionLocal()
+        try:
+            device = db.get(Device, "duplicate-test-node")
+            if device is not None:
+                db.delete(device)
+                db.commit()
+        finally:
+            db.close()
