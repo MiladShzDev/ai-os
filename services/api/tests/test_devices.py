@@ -743,3 +743,41 @@ def test_update_device_rejects_too_long_field():
                 db.commit()
         finally:
             db.close()
+
+
+def test_device_response_contains_all_fields():
+    payload = {
+        "node_id": "response-schema-test-node",
+        "node_type": "client",
+        "platform": "macos",
+        "version": "1.0.0",
+        "status": "online",
+        "capabilities": ["test"],
+        "agent_id": "response-schema-agent",
+        "last_seen": "2026-08-27T12:00:00Z",
+    }
+
+    created = client.post("/api/v1/devices", json=payload)
+    assert created.status_code == 201
+
+    try:
+        device = created.json()
+
+        assert device["node_id"] == "response-schema-test-node"
+        assert device["node_type"] == "client"
+        assert device["platform"] == "macos"
+        assert device["version"] == "1.0.0"
+        assert device["status"] == "online"
+        assert device["capabilities"] == ["test"]
+        assert device["agent_id"] == "response-schema-agent"
+        assert device["last_seen"] is not None
+
+    finally:
+        db = SessionLocal()
+        try:
+            device = db.get(Device, "response-schema-test-node")
+            if device is not None:
+                db.delete(device)
+                db.commit()
+        finally:
+            db.close()
