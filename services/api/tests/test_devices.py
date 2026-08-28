@@ -300,3 +300,51 @@ def test_create_device_rejects_empty_required_field():
     response = client.post("/api/v1/devices", json=payload)
 
     assert response.status_code == 422
+
+
+def test_list_devices_pagination():
+    payloads = [
+        {
+            "node_id": "pagination-node-1",
+            "node_type": "client",
+            "platform": "macos",
+            "version": "1.0.0",
+            "status": "online",
+            "capabilities": ["test"],
+            "agent_id": "pagination-agent-1",
+            "last_seen": "2026-08-27T12:00:00Z",
+        },
+        {
+            "node_id": "pagination-node-2",
+            "node_type": "client",
+            "platform": "macos",
+            "version": "1.0.0",
+            "status": "online",
+            "capabilities": ["test"],
+            "agent_id": "pagination-agent-2",
+            "last_seen": "2026-08-27T12:00:00Z",
+        },
+    ]
+
+    try:
+        for payload in payloads:
+            response = client.post("/api/v1/devices", json=payload)
+            assert response.status_code == 201
+
+        response = client.get(
+            "/api/v1/devices",
+            params={"limit": 1, "offset": 0},
+        )
+
+        assert response.status_code == 200
+        assert len(response.json()) == 1
+    finally:
+        db = SessionLocal()
+        try:
+            for node_id in ["pagination-node-1", "pagination-node-2"]:
+                device = db.get(Device, node_id)
+                if device is not None:
+                    db.delete(device)
+            db.commit()
+        finally:
+            db.close()
