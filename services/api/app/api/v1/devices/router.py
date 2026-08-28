@@ -45,10 +45,28 @@ def get_device(node_id: str, db: Session = Depends(get_db)) -> Device:
 def list_devices(
     limit: int = Query(default=50, ge=1, le=100),
     offset: int = Query(default=0, ge=0),
+    node_type: str | None = None,
+    platform: str | None = None,
+    status: str | None = None,
+    agent_id: str | None = None,
     db: Session = Depends(get_db),
 ) -> list[Device]:
+    query = db.query(Device)
+
+    if node_type is not None:
+        query = query.filter(Device.node_type == node_type)
+
+    if platform is not None:
+        query = query.filter(Device.platform == platform)
+
+    if status is not None:
+        query = query.filter(Device.status == status)
+
+    if agent_id is not None:
+        query = query.filter(Device.agent_id == agent_id)
+
     return (
-        db.query(Device)
+        query
         .order_by(Device.node_id)
         .offset(offset)
         .limit(limit)

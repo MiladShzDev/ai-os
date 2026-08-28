@@ -371,3 +371,55 @@ def test_list_devices_rejects_invalid_pagination():
     )
 
     assert response.status_code == 422
+
+
+def test_list_devices_filter_by_status():
+    payloads = [
+        {
+            "node_id": "filter-online-node",
+            "node_type": "client",
+            "platform": "macos",
+            "version": "1.0.0",
+            "status": "online",
+            "capabilities": ["test"],
+            "agent_id": "filter-agent-1",
+            "last_seen": "2026-08-27T12:00:00Z",
+        },
+        {
+            "node_id": "filter-offline-node",
+            "node_type": "client",
+            "platform": "macos",
+            "version": "1.0.0",
+            "status": "offline",
+            "capabilities": ["test"],
+            "agent_id": "filter-agent-2",
+            "last_seen": "2026-08-27T12:00:00Z",
+        },
+    ]
+
+    try:
+        for payload in payloads:
+            response = client.post("/api/v1/devices", json=payload)
+            assert response.status_code == 201
+
+        response = client.get(
+            "/api/v1/devices",
+            params={"status": "offline"},
+        )
+
+        assert response.status_code == 200
+        devices = response.json()
+
+        assert len(devices) == 1
+        assert devices[0]["node_id"] == "filter-offline-node"
+
+    finally:
+        db = SessionLocal()
+        try:
+            for node_id in ["filter-online-node", "filter-offline-node"]:
+                device = db.get(Device, node_id)
+                if device is not None:
+                    db.delete(device)
+            db.commit()
+        finally:
+            db.close()
