@@ -595,3 +595,66 @@ def test_list_devices_combined_filters():
             db.commit()
         finally:
             db.close()
+
+
+def test_list_devices_order_by_node_id():
+    payloads = [
+        {
+            "node_id": "order-z-node",
+            "node_type": "client",
+            "platform": "linux",
+            "version": "1.0.0",
+            "status": "online",
+            "capabilities": ["test"],
+            "agent_id": "order-agent-z",
+            "last_seen": "2026-08-27T12:00:00Z",
+        },
+        {
+            "node_id": "order-a-node",
+            "node_type": "client",
+            "platform": "linux",
+            "version": "1.0.0",
+            "status": "online",
+            "capabilities": ["test"],
+            "agent_id": "order-agent-a",
+            "last_seen": "2026-08-27T12:00:00Z",
+        },
+    ]
+
+    try:
+        for payload in payloads:
+            response = client.post("/api/v1/devices", json=payload)
+            assert response.status_code == 201
+
+        response = client.get("/api/v1/devices")
+
+        assert response.status_code == 200
+        devices = response.json()
+
+        ids = [
+            device["node_id"]
+            for device in devices
+            if device["node_id"] in [
+                "order-z-node",
+                "order-a-node",
+            ]
+        ]
+
+        assert ids == [
+            "order-a-node",
+            "order-z-node",
+        ]
+
+    finally:
+        db = SessionLocal()
+        try:
+            for node_id in [
+                "order-z-node",
+                "order-a-node",
+            ]:
+                device = db.get(Device, node_id)
+                if device is not None:
+                    db.delete(device)
+            db.commit()
+        finally:
+            db.close()
