@@ -283,3 +283,20 @@ def test_create_device_rejects_missing_required_field():
     response = client.post("/api/v1/devices", json=payload)
 
     assert response.status_code == 422
+
+
+def test_create_device_rejects_empty_required_field():
+    payload = {
+        "node_id": "",
+        "node_type": "client",
+        "platform": "macos",
+        "version": "1.0.0",
+        "status": "online",
+        "capabilities": ["test"],
+        "agent_id": "validation-test-agent",
+        "last_seen": "2026-08-27T12:00:00Z",
+    }
+
+    response = client.post("/api/v1/devices", json=payload)
+
+    assert response.status_code == 422
