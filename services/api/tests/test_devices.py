@@ -423,3 +423,41 @@ def test_list_devices_filter_by_status():
             db.commit()
         finally:
             db.close()
+
+
+def test_list_devices_filter_by_agent_id():
+    payload = {
+        "node_id": "filter-agent-node",
+        "node_type": "client",
+        "platform": "macos",
+        "version": "1.0.0",
+        "status": "online",
+        "capabilities": ["test"],
+        "agent_id": "specific-agent-id",
+        "last_seen": "2026-08-27T12:00:00Z",
+    }
+
+    created = client.post("/api/v1/devices", json=payload)
+    assert created.status_code == 201
+
+    try:
+        response = client.get(
+            "/api/v1/devices",
+            params={"agent_id": "specific-agent-id"},
+        )
+
+        assert response.status_code == 200
+        devices = response.json()
+
+        assert len(devices) == 1
+        assert devices[0]["node_id"] == "filter-agent-node"
+
+    finally:
+        db = SessionLocal()
+        try:
+            device = db.get(Device, "filter-agent-node")
+            if device is not None:
+                db.delete(device)
+                db.commit()
+        finally:
+            db.close()
