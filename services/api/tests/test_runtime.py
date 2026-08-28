@@ -5,6 +5,7 @@ from fastapi.testclient import TestClient
 from app.db import SessionLocal
 from app.main import app
 from app.models.agent import Agent
+from app.models.device import Device
 from app.models.task import Task
 
 client = TestClient(app)
@@ -24,6 +25,17 @@ def test_runtime_execute_selects_agent_by_capability():
         state={},
     )
 
+    device = Device(
+        node_id="runtime-node",
+        node_type="desktop",
+        platform="linux",
+        version="1.0",
+        status="active",
+        capabilities=["shell"],
+        agent_id="runtime-agent",
+        last_seen=datetime.now(timezone.utc),
+    )
+
     task = Task(
         task_id="runtime-capability-task",
         parent_task_id=None,
@@ -41,6 +53,7 @@ def test_runtime_execute_selects_agent_by_capability():
     )
 
     db.add(agent)
+    db.add(device)
     db.add(task)
     db.commit()
     db.close()
@@ -70,6 +83,10 @@ def test_runtime_execute_selects_agent_by_capability():
             agent = db.get(Agent, "runtime-agent")
             if agent is not None:
                 db.delete(agent)
+
+            device = db.get(Device, "runtime-node")
+            if device is not None:
+                db.delete(device)
 
             db.commit()
 

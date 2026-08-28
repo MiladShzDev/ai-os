@@ -3,6 +3,7 @@ from sqlalchemy.orm import Session
 
 from ....deps import get_db
 from ....models.agent import Agent
+from ....models.device import Device
 from ....models.task import Task
 from .schemas import RuntimeExecuteRequest, RuntimeExecuteResponse
 
@@ -27,6 +28,11 @@ def execute_task(
         ).all()
 
         for agent in agents:
+            device = db.get(Device, agent.node_id)
+
+            if device is None or device.status != "active":
+                continue
+
             if all(
                 capability in agent.capabilities
                 for capability in task.required_capabilities
