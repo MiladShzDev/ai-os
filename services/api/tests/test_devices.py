@@ -221,3 +221,13 @@ def test_update_device():
                 db.commit()
         finally:
             db.close()
+
+
+def test_update_missing_device():
+    response = client.patch(
+        "/api/v1/devices/missing-update-node",
+        json={"status": "offline"},
+    )
+
+    assert response.status_code == 404
+    assert response.json() == {"detail": "Device not found"}
