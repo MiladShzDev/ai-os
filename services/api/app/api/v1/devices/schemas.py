@@ -1,16 +1,16 @@
 from datetime import datetime
 
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 
 class DeviceCreate(BaseModel):
-    node_id: str
-    node_type: str
-    platform: str
-    version: str
-    status: str
+    node_id: str = Field(min_length=1, max_length=255)
+    node_type: str = Field(min_length=1, max_length=100)
+    platform: str = Field(min_length=1, max_length=100)
+    version: str = Field(min_length=1, max_length=100)
+    status: str = Field(min_length=1, max_length=50)
     capabilities: list
-    agent_id: str
+    agent_id: str = Field(min_length=1, max_length=255)
     last_seen: datetime
 
 
