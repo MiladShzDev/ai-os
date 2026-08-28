@@ -8,6 +8,21 @@ from .schemas import TaskCreate, TaskResponse, TaskUpdate
 
 router = APIRouter(prefix="/tasks", tags=["tasks"])
 
+ALLOWED_STATE_TRANSITIONS = {
+    "pending": {"running"},
+    "running": {"completed", "failed"},
+    "completed": set(),
+    "failed": set(),
+}
+
+
+def validate_state_transition(current_state: str, new_state: str) -> bool:
+    if current_state == new_state:
+        return True
+
+    return new_state in ALLOWED_STATE_TRANSITIONS.get(current_state, set())
+
+
 
 @router.post("", response_model=TaskResponse, status_code=201)
 def create_task(
@@ -55,7 +70,16 @@ def update_task(
     if task is None:
         raise HTTPException(status_code=404, detail="Task not found")
 
-    for field, value in payload.model_dump(exclude_unset=True).items():
+    updates = payload.model_dump(exclude_unset=True)
+
+    if "state" in updates:
+        if not validate_state_transition(task.state, updates["state"]):
+            raise HTTPException(
+                status_code=400,
+                detail="Invalid task state transition",
+            )
+
+    for field, value in updates.items():
         setattr(task, field, value)
 
     db.commit()
