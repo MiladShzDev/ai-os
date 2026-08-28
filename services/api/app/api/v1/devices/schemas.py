@@ -19,10 +19,10 @@ class DeviceResponse(DeviceCreate):
 
 
 class DeviceUpdate(BaseModel):
-    node_type: str | None = None
-    platform: str | None = None
-    version: str | None = None
-    status: str | None = None
+    node_type: str | None = Field(default=None, min_length=1, max_length=100)
+    platform: str | None = Field(default=None, min_length=1, max_length=100)
+    version: str | None = Field(default=None, min_length=1, max_length=100)
+    status: str | None = Field(default=None, min_length=1, max_length=50)
     capabilities: list | None = None
-    agent_id: str | None = None
+    agent_id: str | None = Field(default=None, min_length=1, max_length=255)
     last_seen: datetime | None = None
