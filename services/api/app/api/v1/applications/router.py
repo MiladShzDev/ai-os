@@ -1,78 +1,116 @@
 from fastapi import APIRouter, Depends, HTTPException
-from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from ....deps import get_db
 from ....models.application import Application
+from ....services.applications.service import (
+    create_application as create_application_service,
+    get_application as get_application_service,
+    update_application as update_application_service,
+    delete_application as delete_application_service,
+)
 from .schemas import ApplicationCreate, ApplicationResponse, ApplicationUpdate
 
-router = APIRouter(prefix="/applications", tags=["applications"])
+
+router = APIRouter(
+    prefix="/applications",
+    tags=["applications"],
+)
 
 
-@router.post("", response_model=ApplicationResponse, status_code=201)
+@router.post(
+    "",
+    response_model=ApplicationResponse,
+    status_code=201,
+)
 def create_application(
     payload: ApplicationCreate,
     db: Session = Depends(get_db),
 ) -> Application:
-    if db.get(Application, payload.application_id) is not None:
-        raise HTTPException(status_code=409, detail="Application already exists")
-
-    application = Application(**payload.model_dump())
-    db.add(application)
-
     try:
-        db.commit()
-    except IntegrityError:
-        db.rollback()
-        raise HTTPException(status_code=409, detail="Application already exists")
+        return create_application_service(
+            db,
+            payload.model_dump(),
+        )
 
-    db.refresh(application)
+    except ValueError as error:
+        raise HTTPException(
+            status_code=409,
+            detail=str(error),
+        )
 
-    return application
 
-
-@router.get("/{application_id}", response_model=ApplicationResponse)
+@router.get(
+    "/{application_id}",
+    response_model=ApplicationResponse,
+)
 def get_application(
     application_id: str,
     db: Session = Depends(get_db),
 ) -> Application:
-    application = db.get(Application, application_id)
+    application = get_application_service(
+        db,
+        application_id,
+    )
 
     if application is None:
-        raise HTTPException(status_code=404, detail="Application not found")
+        raise HTTPException(
+            status_code=404,
+            detail="Application not found",
+        )
 
     return application
 
 
-@router.patch("/{application_id}", response_model=ApplicationResponse)
+@router.patch(
+    "/{application_id}",
+    response_model=ApplicationResponse,
+)
 def update_application(
     application_id: str,
     payload: ApplicationUpdate,
     db: Session = Depends(get_db),
 ) -> Application:
-    application = db.get(Application, application_id)
+    application = get_application_service(
+        db,
+        application_id,
+    )
 
     if application is None:
-        raise HTTPException(status_code=404, detail="Application not found")
+        raise HTTPException(
+            status_code=404,
+            detail="Application not found",
+        )
 
-    for field, value in payload.model_dump(exclude_unset=True).items():
-        setattr(application, field, value)
+    return update_application_service(
+        db,
+        application,
+        payload.model_dump(
+            exclude_unset=True,
+        ),
+    )
 
-    db.commit()
-    db.refresh(application)
 
-    return application
-
-
-@router.delete("/{application_id}", status_code=204)
+@router.delete(
+    "/{application_id}",
+    status_code=204,
+)
 def delete_application(
     application_id: str,
     db: Session = Depends(get_db),
 ) -> None:
-    application = db.get(Application, application_id)
+    application = get_application_service(
+        db,
+        application_id,
+    )
 
     if application is None:
-        raise HTTPException(status_code=404, detail="Application not found")
+        raise HTTPException(
+            status_code=404,
+            detail="Application not found",
+        )
 
-    db.delete(application)
-    db.commit()
+    delete_application_service(
+        db,
+        application,
+    )
