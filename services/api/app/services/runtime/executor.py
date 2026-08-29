@@ -6,6 +6,7 @@ from ...models.agent import Agent
 from ...models.device import Device
 from ...models.permission import Permission
 from ...models.task import Task
+from ..tasks.lifecycle import update_task_state
 
 
 def has_permission(
@@ -68,17 +69,22 @@ def execute_task(
     )
 
     if not selected_agents:
-        task.state = "failed"
-        task.error = {
-            "reason": "No available agent",
-        }
+        update_task_state(
+            db,
+            task,
+            "failed",
+            {
+                "reason": "No available agent",
+            },
+        )
 
     else:
         task.selected_agents = selected_agents
-        task.state = "running"
-        task.error = None
 
-    db.commit()
-    db.refresh(task)
+        update_task_state(
+            db,
+            task,
+            "running",
+        )
 
     return task
