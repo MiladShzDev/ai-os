@@ -3,7 +3,7 @@ from sqlalchemy.orm import Session
 
 from ....deps import get_db
 from ....models.task import Task
-from ....services.runtime.executor import select_agents
+from ....services.runtime.executor import execute_task as run_task
 
 from .schemas import RuntimeExecuteRequest, RuntimeExecuteResponse
 
@@ -19,9 +19,8 @@ def execute_task(
 
     if task is None:
         raise HTTPException(status_code=404, detail="Task not found")
-    from ....services.runtime.executor import execute_task
 
-    task = execute_task(
+    task = run_task(
     db,
     task,
     )
