@@ -1,105 +1,163 @@
 from fastapi import APIRouter, Depends, HTTPException, Query
-from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from ....deps import get_db
-from ....models.device import Device
+from ....services.devices.service import (
+    create_device as create_device_service,
+    get_device as get_device_service,
+    list_devices as list_devices_service,
+    update_device as update_device_service,
+    delete_device as delete_device_service,
+)
 from .schemas import DeviceCreate, DeviceResponse, DeviceUpdate
 
-router = APIRouter(prefix="/devices", tags=["devices"])
+
+router = APIRouter(
+    prefix="/devices",
+    tags=["devices"],
+)
 
 
-@router.post("", response_model=DeviceResponse, status_code=201)
+@router.post(
+    "",
+    response_model=DeviceResponse,
+    status_code=201,
+)
 def create_device(
     payload: DeviceCreate,
     db: Session = Depends(get_db),
-) -> Device:
-    if db.get(Device, payload.node_id) is not None:
-        raise HTTPException(status_code=409, detail="Device already exists")
-
-    device = Device(**payload.model_dump())
-    db.add(device)
-
+):
     try:
-        db.commit()
-    except IntegrityError:
-        db.rollback()
-        raise HTTPException(status_code=409, detail="Device already exists")
+        return create_device_service(
+            db,
+            payload.model_dump(),
+        )
 
-    db.refresh(device)
+    except ValueError as error:
+        raise HTTPException(
+            status_code=409,
+            detail=str(error),
+        )
 
-    return device
 
-
-@router.get("/{node_id}", response_model=DeviceResponse)
-def get_device(node_id: str, db: Session = Depends(get_db)) -> Device:
-    device = db.get(Device, node_id)
+@router.get(
+    "/{node_id}",
+    response_model=DeviceResponse,
+)
+def get_device(
+    node_id: str,
+    db: Session = Depends(get_db),
+):
+    device = get_device_service(
+        db,
+        node_id,
+    )
 
     if device is None:
-        raise HTTPException(status_code=404, detail="Device not found")
+        raise HTTPException(
+            status_code=404,
+            detail="Device not found",
+        )
 
     return device
 
 
-@router.get("", response_model=list[DeviceResponse])
+@router.get(
+    "",
+    response_model=list[DeviceResponse],
+)
 def list_devices(
-    limit: int = Query(default=50, ge=1, le=100),
-    offset: int = Query(default=0, ge=0),
-    node_type: str | None = Query(default=None, min_length=1, max_length=100),
-    platform: str | None = Query(default=None, min_length=1, max_length=100),
-    status: str | None = Query(default=None, min_length=1, max_length=50),
-    agent_id: str | None = Query(default=None, min_length=1, max_length=255),
+    limit: int = Query(
+        default=50,
+        ge=1,
+        le=100,
+    ),
+    offset: int = Query(
+        default=0,
+        ge=0,
+    ),
+    node_type: str | None = Query(
+        default=None,
+        min_length=1,
+        max_length=100,
+    ),
+    platform: str | None = Query(
+        default=None,
+        min_length=1,
+        max_length=100,
+    ),
+    status: str | None = Query(
+        default=None,
+        min_length=1,
+        max_length=50,
+    ),
+    agent_id: str | None = Query(
+        default=None,
+        min_length=1,
+        max_length=255,
+    ),
     db: Session = Depends(get_db),
-) -> list[Device]:
-    query = db.query(Device)
-
-    if node_type is not None:
-        query = query.filter(Device.node_type == node_type)
-
-    if platform is not None:
-        query = query.filter(Device.platform == platform)
-
-    if status is not None:
-        query = query.filter(Device.status == status)
-
-    if agent_id is not None:
-        query = query.filter(Device.agent_id == agent_id)
-
-    return (
-        query
-        .order_by(Device.node_id)
-        .offset(offset)
-        .limit(limit)
-        .all()
+):
+    return list_devices_service(
+        db,
+        limit,
+        offset,
+        node_type,
+        platform,
+        status,
+        agent_id,
     )
 
 
-@router.delete("/{node_id}", status_code=204)
-def delete_device(node_id: str, db: Session = Depends(get_db)) -> None:
-    device = db.get(Device, node_id)
-
-    if device is None:
-        raise HTTPException(status_code=404, detail="Device not found")
-
-    db.delete(device)
-    db.commit()
-
-
-@router.patch("/{node_id}", response_model=DeviceResponse)
+@router.patch(
+    "/{node_id}",
+    response_model=DeviceResponse,
+)
 def update_device(
     node_id: str,
     payload: DeviceUpdate,
     db: Session = Depends(get_db),
-) -> Device:
-    device = db.get(Device, node_id)
+):
+    device = get_device_service(
+        db,
+        node_id,
+    )
 
     if device is None:
-        raise HTTPException(status_code=404, detail="Device not found")
+        raise HTTPException(
+            status_code=404,
+            detail="Device not found",
+        )
 
-    for field, value in payload.model_dump(exclude_unset=True).items():
-        setattr(device, field, value)
+    return update_device_service(
+        db,
+        device,
+        payload.model_dump(
+            exclude_unset=True,
+        ),
+    )
 
-    db.commit()
-    db.refresh(device)
 
-    return device
+@router.delete(
+    "/{node_id}",
+    status_code=204,
+)
+def delete_device(
+    node_id: str,
+    db: Session = Depends(get_db),
+):
+    device = get_device_service(
+        db,
+        node_id,
+    )
+
+    if device is None:
+        raise HTTPException(
+            status_code=404,
+            detail="Device not found",
+        )
+
+    delete_device_service(
+        db,
+        device,
+    )
