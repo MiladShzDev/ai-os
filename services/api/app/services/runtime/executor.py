@@ -6,6 +6,7 @@ from ...models.agent import Agent
 from ...models.device import Device
 from ...models.permission import Permission
 from ...models.task import Task
+from ..agents.executor import execute_agent
 from ..tasks.lifecycle import update_task_state
 
 
@@ -77,14 +78,35 @@ def execute_task(
                 "reason": "No available agent",
             },
         )
+        return task
 
-    else:
-        task.selected_agents = selected_agents
+    task.selected_agents = selected_agents
 
-        update_task_state(
+    for agent_id in selected_agents:
+        agent = db.get(Agent, agent_id)
+
+        if agent is None:
+            update_task_state(
+                db,
+                task,
+                "failed",
+                {
+                    "reason": "Selected agent not found",
+                    "agent_id": agent_id,
+                },
+            )
+            return task
+
+        execute_agent(
             db,
+            agent,
             task,
-            "running",
         )
+
+    update_task_state(
+        db,
+        task,
+        "running",
+    )
 
     return task
