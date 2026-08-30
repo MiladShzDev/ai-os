@@ -12,8 +12,11 @@ def execute_agent(
     if agent.status != "active":
         raise ValueError("Agent is not active")
 
-    return {
+    result = {
         "agent_id": agent.agent_id,
         "task_id": task.task_id,
-        "status": "accepted",
+        "status": "completed",
+        "output": None,
     }
+
+    return result

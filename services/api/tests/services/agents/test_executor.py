@@ -55,15 +55,21 @@ def test_execute_agent_accepts_active_agent(db_session):
     assert result == {
         "agent_id": "executor-agent",
         "task_id": "executor-task",
-        "status": "accepted",
+        "status": "completed",
+        "output": None,
     }
 
 
 def test_execute_agent_rejects_inactive_agent(db_session):
-    agent = build_agent(status="offline")
+    agent = build_agent(
+        status="offline",
+    )
     task = build_task()
 
-    with pytest.raises(ValueError, match="Agent is not active"):
+    with pytest.raises(
+        ValueError,
+        match="Agent is not active",
+    ):
         execute_agent(
             db_session,
             agent,
@@ -95,4 +101,17 @@ def test_execute_agent_returns_execution_status(db_session):
         task,
     )
 
-    assert result["status"] == "accepted"
+    assert result["status"] == "completed"
+
+
+def test_execute_agent_contains_output_field(db_session):
+    agent = build_agent()
+    task = build_task()
+
+    result = execute_agent(
+        db_session,
+        agent,
+        task,
+    )
+
+    assert "output" in result
